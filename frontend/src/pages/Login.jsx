@@ -1,6 +1,7 @@
 export default function Login() {
     const handleLogin=() => {
-        window.location.href = "http://localhost:4000/auth/google"
+        const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:4000"
+        window.location.href = `${backendUrl}/auth/google`
     }
 
     return(
