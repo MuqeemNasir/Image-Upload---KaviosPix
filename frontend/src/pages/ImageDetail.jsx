@@ -9,6 +9,7 @@ export default function ImageDetail() {
 
     const [image, setImage] = useState(location.state?.image)
     const [comment, setComment] = useState("")
+    const [confirmDelete, setConfirmDelete] = useState(false)
 
     if(!image){
         return (
@@ -41,8 +42,6 @@ export default function ImageDetail() {
     }
 
     const deleteImage = async() => {
-        if(!window.confirm("Delete this image forever?")) return
-
         try {
             await api.delete(`/albums/${albumId}/images/${imageId}`)
             navigate(`/albums/${albumId}`)
@@ -80,7 +79,14 @@ export default function ImageDetail() {
                             <div className="col-6">
                                 <p className="mb-1"><b>Tags: </b>{image.tags?.length > 0 ? image.tags.join(", ") : "None"}</p>
                             </div>
-                            <button className="btn btn-danger w-100 mb-4" onClick={deleteImage}>Trash Image</button>
+                            {!confirmDelete ? (
+                                <button className="btn btn-danger w-100 mb-4" onClick={setConfirmDelete(true)}>Trash Image</button>
+                            ) : (
+                                <div className="d-flex gap-2 mb-4">
+                                    <button className="btn btn-danger w-50" onClick={deleteImage}>Yes, Delete it</button>
+                                    <button className="btn btn-secondary w-50" onClick={() => setConfirmDelete(false)}>Cancel</button>
+                                </div>
+                            )}
                             <hr />
                             <h5>Comments</h5>
                             <ul className="list-group mb-3">

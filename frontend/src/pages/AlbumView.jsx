@@ -15,6 +15,7 @@ export default function AlbumView() {
   const [file, setFile] = useState(null);
   const [tags, setTags] = useState("");
   const [person, setPerson] = useState("");
+  const [errorMsg, setErrorMsg] = useState("")
 
   const fileInputRef = useRef(null)
 
@@ -33,8 +34,9 @@ export default function AlbumView() {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!file) return alert("Select an Image.");
-
+    if (!file) return setErrorMsg("Please select an Image to upload.")
+    
+    setErrorMsg("")
     const formData = new FormData();
     formData.append("file", file);
     formData.append("person", person);
@@ -60,12 +62,13 @@ export default function AlbumView() {
       fetchImages();
     } catch (error) {
       console.error(error);
-      alert("Upload failed.");
+      setErrorMsg("Upload failed. Check your file size or format.")
     }
   };
 
   return (
     <div>
+        {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
       <button className="btn btn-secondary mb-3" onClick={() => navigate("/")}>
         &larr; Back to Albums
       </button>

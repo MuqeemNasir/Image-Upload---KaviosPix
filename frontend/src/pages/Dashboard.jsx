@@ -8,7 +8,11 @@ export default function Dashboard() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [message, setMessage] = useState("");
+  const [successMsg, setSuccessMsg] = useState("")
   const navigate = useNavigate();
+
+  const [activeAction, setActiveAction] = useState({albumId: null, type: null})
+  const [actionInput, setActionInput] = useState("")
 
   const fetchAlbums = async () => {
     try {
@@ -36,52 +40,48 @@ export default function Dashboard() {
       fetchAlbums();
     } catch (error) {
       console.error(error);
+      setMessage("Failed to create Album")
     }
   };
 
-  const handleDelete = async (albumId) => {
-    if(!window.confirm("Delete this album?")) return
-
+  const handleActionSubmit = async(albumId) => {
     try {
+      setMessage("")
+      setSuccessMsg("")
+
+      if(activeAction.type = "edit"){
+        if(!actionInput) return setMessage("Description cannot be empty")
+        await api.put(`/albums/${albumId}`, {description: actionInput})
+        setSuccessMsg("Description updated!")
+      }else if(activeAction.type === "share"){
+        if(!actionInput) return setMessage("Email cannot be empty")
+        await api.post(`/albums/${albumId}/share`, {emails: [actionInput]})
+        setSuccessMsg(`Album shared with ${actionInput}!`)
+      }
+      else if(activeAction.type === "delete"){
         await api.delete(`/albums/${albumId}`)
-        fetchAlbums()
-    } catch (error) {
-        console.error(error)
-    }
-  }
+        setSuccessMsg("Album deleted.")
+      }
 
-  const handleUpdate = async(albumId) => {
-    const newDesc = window.prompt("Enter new description for this album.")
-    if(!newDesc) return
-
-    try {
-      await api.put(`/albums/${albumId}`, {description: newDesc})
+      setActiveAction({albumId: null, type: null})
+      setActionInput("")
       fetchAlbums()
     } catch (error) {
       console.error(error)
-      alert(error.response?.data?.message || "Failed to update description.")
+      setMessage(error.response?.data?.message || "Action Failed.")
     }
   }
 
-  const handleShare = async(albumId) => {
-    const email = window.prompt("Enter the email of the user to share with (they must be registered)")
-
-    if(!email) return
-
-    try {
-      await api.put(`/albums/${albumId}/share`, {emails: [email]})
-      alert(`Successfully shared album with ${email}!`)
-      fetchAlbums()
-    } catch (error) {
-      console.error(error)
-      alert(error.response?.data?.message || "Failed to share album. Make sure the user exists.")
-    }
+  const openAction = (albumId, type) => {
+    setActiveAction({albumId, type})
+    setActionInput("")
   }
 
   return(
     <div>
         <h2 className="mb-4">Your Albums</h2>
         {message && <div className="alert alert-danger">{message}</div> }
+        {successMsg && <div className="alert alert-success">{successMsg}</div> }
 
         <div className="card mb-4 shadow-sm">
             <div className="card-body">
@@ -105,11 +105,27 @@ export default function Dashboard() {
                             <p className="card-text text-muted mb-2">{album.description || "No Description"}</p>
                             <small className="text-secondary d-block mb-3">{album.sharedUsers?.length > 0 ? `Shared with: ${album.sharedUsers.join(', ')}` : "Private"}</small>
                         </div>
-                        <div className="card-footer bg-white d-flex flex-wrap gap-2 justify-content-center">
-                            <button className="btn btn-sm btn-primary" onClick={() => navigate(`/albums/${album.albumId}`, {state: {album}})}>Open</button>
-                            <button className="btn btn-sm btn-outline-secondary" onClick={() => handleUpdate(album.albumId)}>Edit</button>
-                            <button className="btn btn-sm btn-outline-info" onClick={() => handleShare(album.albumId)}>Share</button>
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(album.albumId)}>Delete</button>
+                        <div className="card-footer bg-white">
+                          {activeAction.albumId === album.albumId ? (
+                            <div className="d-flex flex-column gap-2">
+                              {activeAction.type === 'delete' ? (
+                                <span className="text-danger fw-bold">Are you sure you want to delete this?</span>
+                              ) : (
+                                <input type={activeAction.type === 'share' ? "email": "text"} className="form-control form-control-sm" placeholder={activeAction.type === 'share' ? 'Enter email address...': 'Enter new description...'} value={actionInput} onChange={(e) => setActionInput(e.target.value)} />
+                              )}
+                              <div className="d-flex gap-2">
+                                <button className={`btn btn-sm w-50 ${activeAction.type === 'delete' ? 'btn-danger' : 'btn-success'}`} onClick={() => handleActionSubmit(album.albumId)}>Confirm</button>
+                                <button className="btn btn-sm btn-secondary w-50" onClick={() => setActiveAction({albumId: null, type: null})}>Cancel</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="d-flex flex-wrap gap-2 justify-content-center">
+                              <button className="btn btn-sm btn-primary" onClick={() => navigate(`/albums/${album.albumId}`, {state: {album}})}>Open</button>
+                              <button className="btn btn-sm btn-outline-secondary" onClick={() => openAction(album.albumId, 'edit')}>Edit</button>
+                              <button className="btn btn-sm btn-outline-info" onClick={() => openAction(album.albumId, 'share')}>Share</button>
+                              <button className="btn btn-sm btn-outline-danger" onClick={() => openAction(album.albumId, 'delete')}>Delete</button>
+                            </div>
+                          )}
                         </div>
                     </div>
                 </div>
