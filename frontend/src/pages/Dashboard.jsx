@@ -49,7 +49,7 @@ export default function Dashboard() {
       setMessage("")
       setSuccessMsg("")
 
-      if(activeAction.type = "edit"){
+      if(activeAction.type === "edit"){
         if(!actionInput) return setMessage("Description cannot be empty")
         await api.put(`/albums/${albumId}`, {description: actionInput})
         setSuccessMsg("Description updated!")
