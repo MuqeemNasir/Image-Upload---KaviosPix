@@ -88,7 +88,7 @@ export default function Dashboard() {
                 <h5 className="card-title">Create New Album</h5>
                 <form onSubmit={handleCreate} className="d-flex gap-2">
                     <input className="form-control" value={name} onChange={e => setName(e.target.value)} placeholder="Album Name" required/>
-                    <input className="form-control" value={description} onChange={e => setDescription(e.target.value)} placeholder="Description (Optional)" required/>
+                    <input className="form-control" value={description} onChange={e => setDescription(e.target.value)} placeholder="Description" required/>
                     <button type="submit" className="btn btn-success">Create</button>
                 </form>
             </div>

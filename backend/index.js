@@ -243,7 +243,8 @@ app.get("/albums/:albumId/images", authMiddleware, async (req, res) => {
         let query = { albumId: req.params.albumId }
 
         if (req.query.tags) {
-            query.tags = { $in: req.query.tags.split(',') }
+            const tagRegexes = req.query.tags.split(',').map(tag => new RegExp(tag.trim(), 'i'))
+            query.tags = { $in: tagRegexes }
         }
 
         const images = await Image.find(query)
