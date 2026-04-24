@@ -79,8 +79,10 @@ export default function ImageDetail() {
                             <div className="col-6">
                                 <p className="mb-1"><b>Tags: </b>{image.tags?.length > 0 ? image.tags.join(", ") : "None"}</p>
                             </div>
+                        </div>
+
                             {!confirmDelete ? (
-                                <button className="btn btn-danger w-100 mb-4" onClick={setConfirmDelete(true)}>Trash Image</button>
+                                <button className="btn btn-danger w-100 mb-4" onClick={() => setConfirmDelete(true)}>Trash Image</button>
                             ) : (
                                 <div className="d-flex gap-2 mb-4">
                                     <button className="btn btn-danger w-50" onClick={deleteImage}>Yes, Delete it</button>
@@ -102,7 +104,6 @@ export default function ImageDetail() {
                                 <input type="text" className="form-control" value={comment} onChange={(e) =>  setComment(e.target.value)} placeholder="Write a comment..." />
                                 <button className="btn btn-primary" onClick={addComment}>Post</button>
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>
